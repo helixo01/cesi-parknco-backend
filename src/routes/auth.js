@@ -4,7 +4,7 @@ const { check } = require('express-validator');
 const authController = require('../controllers/authController');
 const auth = require('../middleware/auth');
 
-// Inscription
+// Route POST /api/auth/register
 router.post(
   '/register',
   [
@@ -14,10 +14,10 @@ router.post(
     check('firstName', 'Le prénom est requis').not().isEmpty(),
     check('lastName', 'Le nom est requis').not().isEmpty()
   ],
-  authController.register // Appelle la fonction register du contrôleur
+  authController.register
 );
 
-// Connexion
+// Route POST /api/auth/login
 router.post(
   '/login',
   [
@@ -25,10 +25,10 @@ router.post(
     check('email', 'Veuillez entrer un email valide').isEmail(),
     check('password', 'Le mot de passe est requis').exists()
   ],
-  authController.login // Appelle la fonction login du contrôleur
+  authController.login
 );
 
-// Profil utilisateur
+// Route GET /api/auth/me
 router.get('/me', auth, authController.getMe);
 
 module.exports = router;

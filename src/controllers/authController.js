@@ -46,7 +46,15 @@ exports.register = async (req, res) => {
       { expiresIn: '24h' },
       (err, token) => {
         if (err) throw err;
-        res.json({ token });
+        res.json({
+          token,
+          user: {
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName
+          }
+        });
       }
     );
   } catch (err) {
@@ -90,7 +98,15 @@ exports.login = async (req, res) => {
       { expiresIn: '24h' },
       (err, token) => {
         if (err) throw err;
-        res.json({ token });
+        res.json({
+          token,
+          user: {
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName
+          }
+        });
       }
     );
   } catch (err) {
@@ -101,6 +117,7 @@ exports.login = async (req, res) => {
 
 exports.getMe = async (req, res) => {
   try {
+    // req.user.id vient du middleware auth
     const user = await User.findById(req.user.id).select('-password');
     res.json(user);
   } catch (err) {
