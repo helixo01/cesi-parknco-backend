@@ -19,6 +19,9 @@ router.post('/login', [
   check('password', 'Le mot de passe est requis').exists()
 ], authController.login);
 
+// GET /api/auth/verify - Vérifier un token
+router.get('/verify', authController.verifyToken);
+
 // GET /api/auth/me - Obtenir les informations de l'utilisateur connecté
 router.get('/me', auth, authController.getMe);
 
