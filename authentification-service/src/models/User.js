@@ -32,6 +32,24 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  profilePicture: {
+    type: String,
+    default: ''
+  },
+  formation: {
+    type: String,
+    enum: ['personnel', 'master', 'cpi', 'fise', 'fisa'],
+    default: 'personnel'
+  },
+  specialite: {
+    type: String,
+    enum: ['informatique', 'btp', 'generaliste'],
+    default: 'informatique'
+  },
+  year: {
+    type: String,
+    default: '1'
+  },
   lastLogin: Date,
   createdAt: {
     type: Date,
