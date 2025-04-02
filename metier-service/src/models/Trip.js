@@ -27,11 +27,6 @@ const tripSchema = new mongoose.Schema({
     required: true,
     min: 1
   },
-  price: {
-    type: Number,
-    required: true,
-    min: 0
-  },
   vehicle: {
     type: String,
     required: false

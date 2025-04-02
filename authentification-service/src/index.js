@@ -23,6 +23,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 // Routes
 app.use('/api/auth', require('./routes/auth'));    // Routes d'authentification publiques
 app.use('/api/users', require('./routes/users'));   // Routes de gestion des utilisateurs (admin)
+app.use('/auth', require('./routes/auth')); 
 
 app.get('/health', (req, res) => {
     res.json({ 

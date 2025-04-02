@@ -3,8 +3,8 @@ const Trip = require('../models/Trip');
 // Créer un nouveau trajet
 exports.createTrip = async (req, res) => {
   try {
-    const { departure, arrival, date, time, availableSeats, price, vehicle } = req.body;
-    const userId = req.user.id; // Obtenu depuis le middleware d'authentification
+    const { departure, arrival, date, time, availableSeats, vehicle } = req.body;
+    const userId = req.user.id;
 
     const trip = new Trip({
       userId,
@@ -13,7 +13,6 @@ exports.createTrip = async (req, res) => {
       date,
       time,
       availableSeats,
-      price,
       vehicle
     });
 
@@ -33,11 +32,32 @@ exports.createTrip = async (req, res) => {
   }
 };
 
-// Récupérer tous les trajets
-exports.getAllTrips = async (req, res) => {
+// Récupérer les trajets de l'utilisateur connecté
+exports.getMyTrips = async (req, res) => {
   try {
-    const trips = await Trip.find().sort({ date: 1, time: 1 });
-    res.json(trips);
+    const userId = req.user.id;
+    const currentDate = new Date();
+
+    // Récupérer tous les trajets de l'utilisateur
+    const trips = await Trip.find({ userId }).sort({ date: 1, time: 1 });
+
+    // Séparer les trajets actuels et l'historique
+    const currentTrips = trips.filter(trip => {
+      const tripDate = new Date(trip.date);
+      tripDate.setHours(parseInt(trip.time.split(':')[0]), parseInt(trip.time.split(':')[1]));
+      return tripDate >= currentDate;
+    });
+
+    const historicTrips = trips.filter(trip => {
+      const tripDate = new Date(trip.date);
+      tripDate.setHours(parseInt(trip.time.split(':')[0]), parseInt(trip.time.split(':')[1]));
+      return tripDate < currentDate;
+    });
+
+    res.json({
+      currentTrips,
+      historicTrips
+    });
   } catch (err) {
     console.error('Erreur lors de la récupération des trajets:', err);
     res.status(500).json({

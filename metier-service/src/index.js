@@ -28,7 +28,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 
 // Routes
 app.post('/trips', auth, tripController.createTrip);
-app.get('/trips', auth, tripController.getAllTrips);
+app.get('/trips/my-trips', auth, tripController.getMyTrips);
 app.get('/trips/:id', auth, tripController.getTripById);
 app.put('/trips/:id', auth, tripController.updateTrip);
 app.delete('/trips/:id', auth, tripController.deleteTrip);

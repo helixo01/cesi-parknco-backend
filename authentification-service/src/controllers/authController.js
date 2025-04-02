@@ -3,6 +3,35 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { validationResult } = require('express-validator');
 
+// Vérifier un token
+exports.verifyToken = async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ message: 'Token manquant' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.user.id);
+
+    if (!user) {
+      return res.status(401).json({ message: 'Utilisateur non trouvé' });
+    }
+
+    res.json({
+      valid: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role
+      }
+    });
+  } catch (err) {
+    console.error('Erreur lors de la vérification du token:', err);
+    res.status(401).json({ message: 'Token invalide' });
+  }
+};
+
 // Inscription d'un nouvel utilisateur
 exports.register = async (req, res) => {
   try {
