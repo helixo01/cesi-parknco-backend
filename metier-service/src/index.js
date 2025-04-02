@@ -3,9 +3,12 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const parkingRoutes = require('./routes/parking');
+const tripController = require('./controllers/tripcontroller');
 const reservationRoutes = require('./routes/reservation');
+const auth = require('./middleware/auth');
 
 const app = express();
+app.use(express.json());
 
 // Middleware
 app.use(cors({
@@ -14,7 +17,6 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
-app.use(express.json());
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, {
@@ -25,6 +27,12 @@ mongoose.connect(process.env.MONGODB_URI, {
 .catch(err => console.error('Could not connect to MongoDB:', err));
 
 // Routes
+app.post('/trips', auth, tripController.createTrip);
+app.get('/trips', auth, tripController.getAllTrips);
+app.get('/trips/:id', auth, tripController.getTripById);
+app.put('/trips/:id', auth, tripController.updateTrip);
+app.delete('/trips/:id', auth, tripController.deleteTrip);
+
 app.use('/api/parkings', parkingRoutes);
 app.use('/api/reservations', reservationRoutes);
 
