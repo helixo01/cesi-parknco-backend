@@ -7,7 +7,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: '*',
+  origin: '*', // Permettre l'accès depuis n'importe quelle origine en développement
   credentials: true
 }));
 app.use(express.json());
@@ -33,6 +33,8 @@ app.get('/health', (req, res) => {
 });
 
 const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => {
-    console.log(`Service authentification running on port ${PORT}`);
+const HOST = '0.0.0.0'; // Écouter sur toutes les interfaces réseau
+
+app.listen(PORT, HOST, () => {
+    console.log(`Service authentification running on http://${HOST}:${PORT}`);
 });
