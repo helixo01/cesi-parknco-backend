@@ -3,7 +3,7 @@ const Trip = require('../models/Trip');
 // Créer un nouveau trajet
 exports.createTrip = async (req, res) => {
   try {
-    const { departure, arrival, date, time, availableSeats, vehicle } = req.body;
+    const { departure, arrival, date, time, availableSeats, vehicle, distance, duration, arrivalTime } = req.body;
     const userId = req.user.id;
 
     const trip = new Trip({
@@ -13,7 +13,10 @@ exports.createTrip = async (req, res) => {
       date,
       time,
       availableSeats,
-      vehicle
+      vehicle,
+      distance,
+      duration,
+      arrivalTime
     });
 
     await trip.save();

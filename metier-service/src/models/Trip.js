@@ -31,10 +31,22 @@ const tripSchema = new mongoose.Schema({
     type: String,
     required: false
   },
+  distance: {
+    type: String,
+    required: true
+  },
+  duration: {
+    type: String,
+    required: true
+  },
   status: {
     type: String,
     enum: ['pending', 'active', 'completed', 'cancelled'],
     default: 'active'
+  },
+  arrivalTime: {
+    type: String,
+    required: true
   },
   createdAt: {
     type: Date,
