@@ -38,18 +38,18 @@ const userSchema = new mongoose.Schema({
   },
   formation: {
     type: String,
-    enum: ['personnel', 'master', 'cpi', 'fise', 'fisa'],
-    default: 'Sélectionnez une formation'
+    enum: ['À définir', 'personnel', 'master', 'cpi', 'fise', 'fisa'],
+    default: 'À définir'
   },
   specialite: {
     type: String,
-    enum: ['informatique', 'btp', 'generaliste'],
-    default: 'Sélectionnez une spécialité'
+    enum: ['À définir', 'informatique', 'btp', 'generaliste'],
+    default: 'À définir'
   },
   year: {
     type: String,
-    enum: ['1', '2', '3', '4', '5'],
-    default: 'Sélectionnez une année'
+    enum: ['À définir', '1', '2', '3', '4', '5'],
+    default: 'À définir'
   },
   lastLogin: {
     type: Date

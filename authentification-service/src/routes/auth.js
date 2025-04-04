@@ -31,9 +31,9 @@ router.put('/me', [
   check('firstName', 'Le prénom est requis').optional().notEmpty(),
   check('lastName', 'Le nom est requis').optional().notEmpty(),
   check('email', 'Email invalide').optional().isEmail(),
-  check('formation', 'Formation invalide').optional().isIn(['personnel', 'master', 'cpi', 'fise', 'fisa']),
-  check('specialite', 'Spécialité invalide').optional().isIn(['informatique', 'btp', 'generaliste']),
-  check('year', 'Année invalide').optional().isIn(['1', '2', '3', '4', '5'])
+  check('formation', 'Formation invalide').optional().isIn(['À définir', 'personnel', 'master', 'cpi', 'fise', 'fisa']),
+  check('specialite', 'Spécialité invalide').optional().isIn(['À définir', 'informatique', 'btp', 'generaliste']),
+  check('year', 'Année invalide').optional().isIn(['À définir', '1', '2', '3', '4', '5'])
 ], authController.updateMe);
 
 // POST /api/auth/profile-picture - Mettre à jour la photo de profil
