@@ -39,18 +39,21 @@ const userSchema = new mongoose.Schema({
   formation: {
     type: String,
     enum: ['personnel', 'master', 'cpi', 'fise', 'fisa'],
-    default: 'personnel'
+    default: 'Sélectionnez une formation'
   },
   specialite: {
     type: String,
     enum: ['informatique', 'btp', 'generaliste'],
-    default: 'informatique'
+    default: 'Sélectionnez une spécialité'
   },
   year: {
     type: String,
-    default: '1'
+    enum: ['1', '2', '3', '4', '5'],
+    default: 'Sélectionnez une année'
   },
-  lastLogin: Date,
+  lastLogin: {
+    type: Date
+  },
   createdAt: {
     type: Date,
     default: Date.now

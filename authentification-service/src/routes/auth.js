@@ -25,6 +25,20 @@ router.get('/verify', authController.verifyToken);
 // GET /api/auth/me - Obtenir les informations de l'utilisateur connecté
 router.get('/me', auth, authController.getMe);
 
+// PUT /api/auth/me - Mettre à jour les informations de l'utilisateur connecté
+router.put('/me', [
+  auth,
+  check('firstName', 'Le prénom est requis').optional().notEmpty(),
+  check('lastName', 'Le nom est requis').optional().notEmpty(),
+  check('email', 'Email invalide').optional().isEmail(),
+  check('formation', 'Formation invalide').optional().isIn(['personnel', 'master', 'cpi', 'fise', 'fisa']),
+  check('specialite', 'Spécialité invalide').optional().isIn(['informatique', 'btp', 'generaliste']),
+  check('year', 'Année invalide').optional().isIn(['1', '2', '3', '4', '5'])
+], authController.updateMe);
+
+// POST /api/auth/profile-picture - Mettre à jour la photo de profil
+router.post('/profile-picture', auth, authController.updateProfilePicture);
+
 // GET /api/auth/stats - Obtenir les statistiques utilisateurs (admin seulement)
 router.get('/stats', auth, adminAuth.userAdmin, authController.getUserStats);
 
