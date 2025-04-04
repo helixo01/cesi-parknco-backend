@@ -25,7 +25,7 @@ const tripSchema = new mongoose.Schema({
   availableSeats: {
     type: Number,
     required: true,
-    min: 1
+    min: 0
   },
   vehicle: {
     type: String,
@@ -48,10 +48,28 @@ const tripSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  requests: [{
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'accepted', 'rejected'],
+      default: 'pending'
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
   createdAt: {
     type: Date,
     default: Date.now
   }
 });
 
-module.exports = mongoose.model('Trip', tripSchema);
+const Trip = mongoose.model('Trip', tripSchema);
+
+module.exports = Trip;

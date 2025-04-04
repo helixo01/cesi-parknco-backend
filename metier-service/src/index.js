@@ -29,9 +29,16 @@ mongoose.connect(process.env.MONGODB_URI, {
 // Routes
 app.post('/trips', auth, tripController.createTrip);
 app.get('/trips/my-trips', auth, tripController.getMyTrips);
+app.get('/trips/search', auth, tripController.searchTrips);
 app.get('/trips/:id', auth, tripController.getTripById);
 app.put('/trips/:id', auth, tripController.updateTrip);
 app.delete('/trips/:id', auth, tripController.deleteTrip);
+
+// Routes pour les demandes de trajet
+app.post('/trips/:tripId/requests', auth, tripController.createTripRequest);
+app.put('/trips/:tripId/requests/:requestId', auth, tripController.handleTripRequest);
+app.get('/trips/:tripId/requests', auth, tripController.getTripRequests);
+app.get('/users/requests', auth, tripController.getUserTripRequests);
 
 app.use('/api/parkings', parkingRoutes);
 app.use('/api/reservations', reservationRoutes);
