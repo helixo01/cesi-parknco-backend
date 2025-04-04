@@ -7,6 +7,10 @@ const tripController = require('./controllers/tripcontroller');
 const reservationRoutes = require('./routes/reservation');
 const auth = require('./middleware/auth');
 
+// Import des modèles
+require('./models/User');
+require('./models/Trip');
+
 const app = express();
 app.use(express.json());
 

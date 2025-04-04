@@ -76,7 +76,11 @@ exports.register = async (req, res) => {
       user: {
         id: user.id,
         email: user.email,
-        role: user.role
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+        profilePicture: user.profilePicture,
+        rating: user.rating || 0
       }
     };
 
@@ -146,7 +150,11 @@ exports.login = async (req, res) => {
       user: {
         id: user.id,
         email: user.email,
-        role: user.role
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+        profilePicture: user.profilePicture,
+        rating: user.rating || 0
       }
     };
 
@@ -187,16 +195,26 @@ exports.getMe = async (req, res) => {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
+<<<<<<< Updated upstream
         role: user.role
+=======
+        role: user.role,
+        formation: user.formation,
+        specialite: user.specialite,
+        year: user.year,
+        profilePicture: user.profilePicture,
+        rating: user.rating || 0,
+        active: user.active
+>>>>>>> Stashed changes
       }
     };
     
     console.log('Informations de l\'utilisateur:', userData);
     res.json(userData);
   } catch (err) {
-    console.error('Erreur lors de la récupération des informations de l\'utilisateur:', err);
+    console.error('Erreur lors de la récupération des informations:', err);
     res.status(500).json({ 
-      message: 'Erreur lors de la récupération des informations de l\'utilisateur',
+      message: 'Erreur lors de la récupération des informations',
       error: err.message 
     });
   }

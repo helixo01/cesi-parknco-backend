@@ -34,7 +34,13 @@ const userSchema = new mongoose.Schema({
   },
   profilePicture: {
     type: String,
-    default: ''
+    default: null
+  },
+  rating: {
+    type: Number,
+    min: 0,
+    max: 5,
+    default: 0
   },
   formation: {
     type: String,

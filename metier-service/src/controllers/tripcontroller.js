@@ -1,4 +1,5 @@
 const Trip = require('../models/Trip');
+const User = require('../models/User');
 
 // Créer un nouveau trajet
 exports.createTrip = async (req, res) => {
@@ -6,8 +7,17 @@ exports.createTrip = async (req, res) => {
     const { departure, arrival, date, time, availableSeats, vehicle, distance, duration, arrivalTime } = req.body;
     const userId = req.user.id;
 
+    // Vérifier si l'utilisateur existe
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(400).json({
+        message: 'Utilisateur non trouvé',
+        error: 'User not found'
+      });
+    }
+
     const trip = new Trip({
-      userId,
+      userId: user._id, // Utiliser l'ID de l'utilisateur vérifié
       departure,
       arrival,
       date,
@@ -16,15 +26,30 @@ exports.createTrip = async (req, res) => {
       vehicle,
       distance,
       duration,
-      arrivalTime
+      arrivalTime,
+      status: 'active'
     });
 
-    await trip.save();
-    console.log('Nouveau trajet créé:', trip);
+    const savedTrip = await trip.save();
+    
+    // Ajouter les informations du conducteur dans la réponse
+    const tripWithDriver = {
+      ...savedTrip.toObject(),
+      driver: {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        profilePicture: user.profilePicture,
+        rating: user.rating || 0
+      }
+    };
+
+    console.log('Nouveau trajet créé:', tripWithDriver);
 
     res.status(201).json({
       message: 'Trajet créé avec succès',
-      trip
+      trip: tripWithDriver
     });
   } catch (err) {
     console.error('Erreur lors de la création du trajet:', err);
@@ -273,44 +298,80 @@ exports.handleTripRequest = async (req, res) => {
   }
 };
 
-// Obtenir les demandes d'un utilisateur (en tant que conducteur ou passager)
+// Récupérer les requêtes de trajet de l'utilisateur
 exports.getUserTripRequests = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { role } = req.query; // 'driver' ou 'passenger'
-
     let trips;
-    if (role === 'driver') {
-      // Obtenir les trajets créés par l'utilisateur avec leurs demandes
-      trips = await Trip.find({ userId });
-    } else if (role === 'passenger') {
-      // Obtenir les trajets où l'utilisateur a postulé
+
+    if (req.query.role === 'driver') {
+      // Récupérer les trajets où l'utilisateur est conducteur et a des demandes
+      trips = await Trip.find({ 
+        userId,
+        'requests.0': { $exists: true } 
+      })
+      .populate({
+        path: 'requests.userId',
+        model: 'User',
+        select: 'firstName lastName email profilePicture rating'
+      })
+      .populate({
+        path: 'userId',
+        model: 'User',
+        select: 'firstName lastName email profilePicture rating'
+      });
+
+    } else {
+      // Récupérer les trajets où l'utilisateur est passager
       trips = await Trip.find({
         'requests.userId': userId
-      }).select('_id departure arrival date time requests');
-
-      // Filtrer pour ne garder que les demandes de l'utilisateur courant
-      const formattedTrips = trips.map(trip => {
-        const userRequest = trip.requests.find(req => req.userId.toString() === userId);
-        if (!userRequest) return null;
-
-        return {
-          _id: trip._id,
-          departure: trip.departure,
-          arrival: trip.arrival,
-          date: trip.date,
-          time: trip.time,
-          requests: [userRequest] // Ne garder que la demande de l'utilisateur
-        };
-      }).filter(trip => trip !== null);
-
-      console.log('Demandes passager formatées:', JSON.stringify(formattedTrips, null, 2));
-      return res.json(formattedTrips);
-    } else {
-      return res.status(400).json({ message: 'Rôle invalide' });
+      })
+      .populate({
+        path: 'userId',
+        model: 'User',
+        select: 'firstName lastName email profilePicture rating'
+      });
     }
 
-    res.json(trips);
+    // Formater les trajets avec les informations du conducteur
+    const formattedTrips = trips.map(trip => {
+      const tripObj = trip.toObject();
+
+      // Formater les informations du conducteur
+      const driver = {
+        _id: tripObj.userId._id,
+        firstName: tripObj.userId.firstName,
+        lastName: tripObj.userId.lastName,
+        email: tripObj.userId.email,
+        profilePicture: tripObj.userId.profilePicture || null,
+        rating: tripObj.userId.rating
+      };
+
+      // Formater les requêtes avec les informations des utilisateurs
+      const formattedRequests = tripObj.requests.map(request => {
+        const user = {
+          _id: request.userId._id,
+          firstName: request.userId.firstName,
+          lastName: request.userId.lastName,
+          email: request.userId.email,
+          profilePicture: request.userId.profilePicture || null,
+          rating: request.userId.rating
+        };
+
+        return {
+          ...request,
+          user
+        };
+      });
+
+      return {
+        ...tripObj,
+        driver,
+        requests: formattedRequests
+      };
+    });
+
+    res.json(formattedTrips);
   } catch (err) {
     console.error('Erreur lors de la récupération des demandes:', err);
     res.status(500).json({
@@ -363,7 +424,6 @@ exports.searchTrips = async (req, res) => {
     endDate.setHours(23, 59, 59, 999);
 
     console.log('Recherche de trajets avec:', { departure, arrival, date, time });
-    console.log('Plage de dates:', { startDate, endDate });
 
     // Construire les critères de recherche
     const searchCriteria = {
@@ -377,19 +437,44 @@ exports.searchTrips = async (req, res) => {
       }
     };
 
-    console.log('Critères de recherche:', JSON.stringify(searchCriteria, null, 2));
-
-    // Rechercher les trajets
+    // Rechercher les trajets avec les informations du conducteur
     const trips = await Trip.find(searchCriteria)
-      .select('departure arrival date time availableSeats vehicle distance duration arrivalTime userId')
+      .populate('userId', 'firstName lastName email profilePicture rating')
       .sort({ date: 1, time: 1 });
 
-    console.log('Trajets trouvés:', trips.length);
-    if (trips.length > 0) {
-      console.log('Premier trajet trouvé:', JSON.stringify(trips[0], null, 2));
-    }
+    console.log('Nombre de trajets trouvés:', trips.length);
 
-    res.json(trips);
+    // Formater les résultats
+    const formattedTrips = trips.map(trip => {
+      const tripObj = trip.toObject();
+      const driverInfo = tripObj.userId;
+
+      // S'assurer que toutes les informations du conducteur sont présentes
+      const driver = {
+        _id: driverInfo._id,
+        firstName: driverInfo.firstName,
+        lastName: driverInfo.lastName,
+        email: driverInfo.email,
+        profilePicture: driverInfo.profilePicture,
+        rating: driverInfo.rating || 0
+      };
+
+      // Retirer les informations du conducteur de l'objet principal
+      delete tripObj.userId;
+
+      // Convertir la date en chaîne de caractères ISO
+      const formattedTrip = {
+        ...tripObj,
+        date: tripObj.date.toISOString(),
+        driver,
+        userId: driver._id // Garder userId pour la compatibilité
+      };
+
+      return formattedTrip;
+    });
+
+    console.log('Premier trajet formaté:', formattedTrips[0]);
+    res.json(formattedTrips);
   } catch (err) {
     console.error('Erreur lors de la recherche des trajets:', err);
     res.status(500).json({
