@@ -1,6 +1,20 @@
 const User = require('../models/User');
 const { validationResult } = require('express-validator');
 
+// Obtenir les informations publiques d'un utilisateur
+exports.getPublicUserInfo = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId).select('firstName lastName profilePicture');
+    if (!user) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    }
+    res.json(user);
+  } catch (err) {
+    console.error('Erreur lors de la récupération des informations publiques:', err);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+};
+
 // Obtenir la liste des utilisateurs (admin seulement)
 exports.getAllUsers = async (req, res) => {
   try {

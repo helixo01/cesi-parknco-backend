@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const parkingRoutes = require('./routes/parking');
 const tripController = require('./controllers/tripcontroller');
+const userController = require('./controllers/userController');
 const reservationRoutes = require('./routes/reservation');
 const auth = require('./middleware/auth');
 
@@ -19,11 +20,11 @@ app.use(cors({
 }));
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI, {
+mongoose.connect(process.env.AUTH_DB_URI || process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
-.then(() => console.log('Connected to MongoDB'))
+.then(() => console.log('Connected to MongoDB Auth Database'))
 .catch(err => console.error('Could not connect to MongoDB:', err));
 
 // Routes
@@ -39,6 +40,9 @@ app.post('/trips/:tripId/requests', auth, tripController.createTripRequest);
 app.put('/trips/:tripId/requests/:requestId', auth, tripController.handleTripRequest);
 app.get('/trips/:tripId/requests', auth, tripController.getTripRequests);
 app.get('/users/requests', auth, tripController.getUserTripRequests);
+
+// Route pour les informations publiques des utilisateurs
+app.get('/api/users/public/:userId', auth, userController.getPublicUserInfo);
 
 app.use('/api/parkings', parkingRoutes);
 app.use('/api/reservations', reservationRoutes);

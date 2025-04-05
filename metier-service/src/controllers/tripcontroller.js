@@ -287,7 +287,7 @@ exports.getUserTripRequests = async (req, res) => {
       // Obtenir les trajets où l'utilisateur a postulé
       trips = await Trip.find({
         'requests.userId': userId
-      }).select('_id departure arrival date time requests');
+      }).select('_id departure arrival date time requests userId');
 
       // Filtrer pour ne garder que les demandes de l'utilisateur courant
       const formattedTrips = trips.map(trip => {
@@ -300,6 +300,7 @@ exports.getUserTripRequests = async (req, res) => {
           arrival: trip.arrival,
           date: trip.date,
           time: trip.time,
+          userId: trip.userId, // Include the driver's userId
           requests: [userRequest] // Ne garder que la demande de l'utilisateur
         };
       }).filter(trip => trip !== null);
