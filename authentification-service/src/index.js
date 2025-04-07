@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const fileUpload = require('express-fileupload');
+const cookieParser = require('cookie-parser');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -9,14 +11,14 @@ const app = express();
 // Middleware
 app.use(cors({
   origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
   credentials: true
 }));
 
 app.use(express.json());
-
-// Configuration de express-fileupload
+app.use(cookieParser());
 app.use(fileUpload({
   limits: { fileSize: 5 * 1024 * 1024 }, // Limite de 5MB
   abortOnLimit: true,
@@ -27,8 +29,8 @@ app.use(fileUpload({
   debug: process.env.NODE_ENV === 'development'
 }));
 
-// Servir les fichiers statiques
-app.use('/uploads', express.static('uploads'));
+// Configuration pour servir les fichiers statiques
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Logging middleware
 app.use((req, res, next) => {

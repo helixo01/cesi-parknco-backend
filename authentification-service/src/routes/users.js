@@ -8,6 +8,9 @@ const adminAuth = require('../middleware/adminAuth');
 // Toutes les routes nécessitent une authentification
 router.use(auth);
 
+// GET /api/users/public/:userId - Obtenir les informations publiques d'un utilisateur
+router.get('/public/:userId', userController.getPublicUserInfo);
+
 // GET /api/users - Obtenir tous les utilisateurs (admin seulement)
 router.get('/', adminAuth.userAdmin, userController.getAllUsers);
 

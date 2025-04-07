@@ -8,7 +8,7 @@ const fs = require('fs');
 // Vérifier un token
 exports.verifyToken = async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
+    const token = req.cookies.token;
     if (!token) {
       return res.status(401).json({ message: 'Token manquant' });
     }
@@ -73,7 +73,7 @@ exports.register = async (req, res) => {
     await user.save();
     console.log('Utilisateur créé:', user);
 
-    // Créer et renvoyer le token JWT
+    // Créer le token JWT
     const payload = {
       user: {
         id: user.id,
@@ -84,9 +84,16 @@ exports.register = async (req, res) => {
 
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '24h' });
 
+    // Définir le cookie HttpOnly
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000 // 24 heures
+    });
+
     res.status(201).json({
       message: 'Utilisateur créé avec succès',
-      token,
       user: {
         id: user.id,
         email: user.email,
@@ -143,7 +150,7 @@ exports.login = async (req, res) => {
     await user.save();
     console.log('Utilisateur connecté:', user);
 
-    // Créer et renvoyer le token JWT
+    // Créer le token JWT
     const payload = {
       user: {
         id: user.id,
@@ -154,9 +161,16 @@ exports.login = async (req, res) => {
 
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '24h' });
 
+    // Définir le cookie HttpOnly
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000 // 24 heures
+    });
+
     res.json({
       message: 'Connexion réussie',
-      token,
       user: {
         id: user.id,
         email: user.email,
@@ -169,6 +183,20 @@ exports.login = async (req, res) => {
     console.error('Erreur lors de la connexion:', err);
     res.status(500).json({ 
       message: 'Erreur lors de la connexion',
+      error: err.message 
+    });
+  }
+};
+
+// Déconnexion d'un utilisateur
+exports.logout = async (req, res) => {
+  try {
+    res.clearCookie('token');
+    res.json({ message: 'Déconnexion réussie' });
+  } catch (err) {
+    console.error('Erreur lors de la déconnexion:', err);
+    res.status(500).json({ 
+      message: 'Erreur lors de la déconnexion',
       error: err.message 
     });
   }
