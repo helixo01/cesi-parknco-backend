@@ -41,8 +41,8 @@ const ratingSchema = new mongoose.Schema({
   }
 });
 
-// Index pour s'assurer qu'un utilisateur ne peut noter qu'une fois par trajet et par rôle
-ratingSchema.index({ tripId: 1, fromUserId: 1, role: 1 }, { unique: true });
+// Index pour s'assurer qu'un utilisateur ne peut noter qu'une fois par trajet, par rôle et par destinataire
+ratingSchema.index({ tripId: 1, fromUserId: 1, toUserId: 1, role: 1 }, { unique: true });
 
 const Rating = mongoose.model('Rating', ratingSchema);
 
