@@ -25,6 +25,9 @@ router.get('/verify', authController.verifyToken);
 // GET /api/auth/me - Obtenir les informations de l'utilisateur connecté
 router.get('/me', auth, authController.getMe);
 
+// POST /api/auth/logout - Déconnexion
+router.post('/logout', auth, authController.logout);
+
 // PUT /api/auth/me - Mettre à jour les informations de l'utilisateur connecté
 router.put('/me', [
   auth,

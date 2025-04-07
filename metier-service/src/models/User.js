@@ -24,7 +24,19 @@ const userSchema = new mongoose.Schema({
   },
   formation: String,
   specialite: String,
-  year: String
+  year: String,
+  driverRating: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 5
+  },
+  passengerRating: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 5
+  }
 }, {
   timestamps: true
 });
