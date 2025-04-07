@@ -12,6 +12,7 @@ const reservationRoutes = require('./routes/reservation');
 const auth = require('./middleware/auth');
 const ratingController = require('./controllers/ratingController');
 const tripConfirmationController = require('./controllers/tripConfirmationController');
+const statsRoutes = require('./routes/stats');
 
 const app = express();
 app.use(express.json());
@@ -73,6 +74,7 @@ app.get('/api/users/public/:userId', auth, userController.getPublicUserInfo);
 
 app.use('/api/parkings', parkingRoutes);
 app.use('/api/reservations', reservationRoutes);
+app.use('/api/stats', statsRoutes);
 
 app.get('/health', (req, res) => {
     res.json({ status: 'OK', service: 'metier-service' });

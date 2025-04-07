@@ -18,4 +18,10 @@ router.get('/occupancy', statsController.getOccupancyStats);
 // GET /api/stats/revenue - Statistiques des revenus
 router.get('/revenue', statsController.getRevenueStats);
 
+// Route pour les statistiques utilisateur
+router.get('/users/:userId', statsController.getUserStats);
+
+// Route pour obtenir tous les utilisateurs avec pagination
+router.get('/users', auth, statsController.getAllUsersStats);
+
 module.exports = router;

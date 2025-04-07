@@ -5,6 +5,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const statsRoutes = require('./routes/stats');
 const systemRoutes = require('./routes/system');
+const gamificationRoutes = require('./routes/gamificationRoutes');
 
 const app = express();
 
@@ -29,6 +30,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 // Routes
 app.use('/api/stats', statsRoutes);   // Routes des statistiques
 app.use('/api/system', systemRoutes); // Routes pour l'admin technique
+app.use('/api/gamification', gamificationRoutes); // Routes de gamification
 
 app.get('/health', (req, res) => {
     res.json({ 
