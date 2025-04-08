@@ -1,7 +1,7 @@
 {
-  "name": "authentification-service",
+  "name": "stats-service",
   "version": "1.0.0",
-  "description": "Service d'authentification pour ParkNCo",
+  "description": "Service de statistiques pour ParkNCo",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
@@ -11,14 +11,10 @@
   },
   "dependencies": {
     "axios": "^1.8.4",
-    "bcryptjs": "^3.0.2",
-    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
-    "express-fileupload": "^1.4.3",
     "express-validator": "^7.0.1",
-    "install": "^0.13.0",
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^7.0.3"
   },
@@ -27,4 +23,4 @@
     "jest": "^29.0.0",
     "nodemon": "^2.0.22"
   }
-}
+} 

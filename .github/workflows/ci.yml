@@ -1,0 +1,53 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [ dev ]
+  pull_request:
+    branches: [ dev ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies for all services
+      run: |
+        cd authentification-service && npm install
+        cd ../administrateur-service && npm install
+        cd ../metier-service && npm install
+        cd ../iot-service && npm install
+        cd ../notification-service && npm install
+        cd ../rating-service && npm install
+        cd ../stats-service && npm install
+    
+    - name: Run lint for all services
+      run: |
+        cd authentification-service && npm run lint
+        cd ../administrateur-service && npm run lint
+        cd ../metier-service && npm run lint
+        cd ../iot-service && npm run lint
+        cd ../notification-service && npm run lint
+        cd ../rating-service && npm run lint
+        cd ../stats-service && npm run lint
+    
+    - name: Run tests for all services
+      run: |
+        cd authentification-service && npm test
+        cd ../administrateur-service && npm test
+        cd ../metier-service && npm test
+        cd ../iot-service && npm test
+        cd ../notification-service && npm test
+        cd ../rating-service && npm test
+        cd ../stats-service && npm test
+      env:
+        MONGODB_URI: ${{ secrets.MONGODB_URI }}
+        JWT_SECRET: ${{ secrets.JWT_SECRET }} 
