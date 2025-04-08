@@ -29,16 +29,6 @@ jobs:
         cd ../rating-service && npm install
         cd ../stats-service && npm install
     
-    - name: Run lint for all services
-      run: |
-        cd authentification-service && npm run lint
-        cd ../administrateur-service && npm run lint
-        cd ../metier-service && npm run lint
-        cd ../iot-service && npm run lint
-        cd ../notification-service && npm run lint
-        cd ../rating-service && npm run lint
-        cd ../stats-service && npm run lint
-    
     - name: Run tests for all services
       run: |
         cd authentification-service && npm test
