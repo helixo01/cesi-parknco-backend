@@ -6,11 +6,12 @@ const Rating = require('../models/Rating');
 const TripConfirmation = require('../models/TripConfirmation');
 const mongoose = require('mongoose');
 const axios = require('axios');
+const { API_ENDPOINTS } = require('../config/api');
 
 // Fonction pour récupérer la configuration de gamification
 const getGamificationConfig = async () => {
   try {
-    const response = await axios.get(`${process.env.ADMIN_SERVICE_URL}/api/gamification`, {
+    const response = await axios.get(API_ENDPOINTS.ADMIN.GAMIFICATION.BASE, {
       headers: {
         'X-Service-Name': 'metier-service'
       }
@@ -21,7 +22,6 @@ const getGamificationConfig = async () => {
     throw new Error('Unable to fetch gamification configuration');
   }
 };
-
 
 // Statistiques des parkings
 exports.getParkingStats = async (req, res) => {
