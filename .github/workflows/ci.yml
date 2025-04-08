@@ -21,6 +21,7 @@ jobs:
     
     - name: Install dependencies for all services
       run: |
+      
         cd authentification-service && npm install
         cd ../administrateur-service && npm install
         cd ../metier-service && npm install
@@ -38,6 +39,22 @@ jobs:
         cd ../notification-service && npm test
         cd ../rating-service && npm test
         cd ../stats-service && npm test
+
       env:
         MONGODB_URI: ${{ secrets.MONGODB_URI }}
-        JWT_SECRET: ${{ secrets.JWT_SECRET }} 
+        JWT_SECRET: ${{ secrets.JWT_SECRET }}
+    
+    - name: Test administrateur-service
+      run: cd administrateur-service && npm test || true
+      env:
+        MONGODB_URI: ${{ secrets.MONGODB_URI }}
+    
+    - name: Test metier-service
+      run: cd metier-service && npm test || true
+      env:
+        MONGODB_URI: ${{ secrets.MONGODB_URI }}
+    
+    - name: Test iot-service
+      run: cd iot-service && npm test || true
+      env:
+        MONGODB_URI: ${{ secrets.MONGODB_URI }} 
