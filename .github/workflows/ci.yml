@@ -21,40 +21,25 @@ jobs:
     
     - name: Install dependencies for all services
       run: |
-        cd authentification-service && npm ci
-        cd ../administrateur-service && npm ci
-        cd ../metier-service && npm ci
-        cd ../iot-service && npm ci
+        for service in authentification-service administrateur-service metier-service iot-service notification-service rating-service stats-service; do
+          if [ -d "$service" ]; then
+            echo "Installing dependencies for $service"
+            cd $service && npm install && cd ..
+          else
+            echo "Warning: $service directory not found, skipping..."
+          fi
+        done
     
-    - name: Lint authentification-service
-      run: cd authentification-service && npm run lint || true
-    
-    - name: Lint administrateur-service
-      run: cd administrateur-service && npm run lint || true
-    
-    - name: Lint metier-service
-      run: cd metier-service && npm run lint || true
-    
-    - name: Lint iot-service
-      run: cd iot-service && npm run lint || true
-    
-    - name: Test authentification-service
-      run: cd authentification-service && npm test || true
+    - name: Run tests for all services
+      run: |
+        for service in authentification-service administrateur-service metier-service iot-service notification-service rating-service stats-service; do
+          if [ -d "$service" ]; then
+            echo "Running tests for $service"
+            cd $service && npm test && cd ..
+          else
+            echo "Warning: $service directory not found, skipping..."
+          fi
+        done
       env:
         MONGODB_URI: ${{ secrets.MONGODB_URI }}
-        JWT_SECRET: ${{ secrets.JWT_SECRET }}
-    
-    - name: Test administrateur-service
-      run: cd administrateur-service && npm test || true
-      env:
-        MONGODB_URI: ${{ secrets.MONGODB_URI }}
-    
-    - name: Test metier-service
-      run: cd metier-service && npm test || true
-      env:
-        MONGODB_URI: ${{ secrets.MONGODB_URI }}
-    
-    - name: Test iot-service
-      run: cd iot-service && npm test || true
-      env:
-        MONGODB_URI: ${{ secrets.MONGODB_URI }} 
+        JWT_SECRET: ${{ secrets.JWT_SECRET }} 
