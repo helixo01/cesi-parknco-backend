@@ -9,6 +9,7 @@ const parkingRoutes = require('./routes/parking');
 const tripController = require('./controllers/tripController');
 const userController = require('./controllers/userController');
 const reservationRoutes = require('./routes/reservation');
+const vehicleRoutes = require('./routes/vehicle');
 const auth = require('./middleware/auth');
 const ratingController = require('./controllers/ratingController');
 const tripConfirmationController = require('./controllers/tripConfirmationController');
@@ -75,10 +76,18 @@ app.get('/api/users/public/:userId', auth, userController.getPublicUserInfo);
 app.use('/api/parkings', parkingRoutes);
 app.use('/api/reservations', reservationRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/vehicles', vehicleRoutes);
 
 app.get('/health', (req, res) => {
     res.json({ status: 'OK', service: 'metier-service' });
 });
+
+// Routes pour les trajets
+if (tripController && tripController.getAllCompletedTrips) {
+    app.get('/api/trips/admin/completed', auth, tripController.getAllCompletedTrips);
+} else {
+    console.error("La méthode getAllCompletedTrips n'existe pas dans le contrôleur de trajets");
+}
 
 // Start server
 const PORT = process.env.PORT || 5002;

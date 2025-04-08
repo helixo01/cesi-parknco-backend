@@ -20,4 +20,7 @@ router.post('/:tripId/rate-driver', authMiddleware, ratingController.completeAsP
 router.post('/:tripId/rate-passenger', authMiddleware, ratingController.completeAsDriver);
 router.get('/users/:userId/ratings', authMiddleware, ratingController.getUserRatings);
 
+// Route pour récupérer tous les trajets terminés (admin seulement)
+router.get('/admin/completed', authMiddleware, tripController.getAllCompletedTrips);
+
 module.exports = router; 

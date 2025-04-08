@@ -757,3 +757,33 @@ exports.confirmPickupAsPassenger = async (req, res) => {
     });
   }
 };
+
+// Récupérer tous les trajets terminés (pour les statistiques admin)
+exports.getAllCompletedTrips = async (req, res) => {
+  try {
+    // Vérifier si l'utilisateur est admin
+    if (req.user.role !== 'admin_user') {
+      return res.status(403).json({ message: 'Accès non autorisé' });
+    }
+
+    const currentDate = new Date();
+
+    // Récupérer tous les trajets terminés
+    const completedTrips = await Trip.find({
+      $or: [
+        { status: 'completed' },
+        { date: { $lt: currentDate } }
+      ]
+    }).sort({ date: -1 });
+
+    console.log(`${completedTrips.length} trajets terminés récupérés`);
+
+    res.json(completedTrips);
+  } catch (err) {
+    console.error('Erreur lors de la récupération des trajets terminés:', err);
+    res.status(500).json({
+      message: 'Erreur lors de la récupération des trajets terminés',
+      error: err.message
+    });
+  }
+};
