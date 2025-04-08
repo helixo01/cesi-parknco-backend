@@ -1,5 +1,6 @@
 const axios = require('axios');
 const AuditLog = require('../models/AuditLog');
+const { API_ENDPOINTS } = require('../config/api');
 
 // Obtenir les statistiques globales de l'application
 exports.getGlobalStats = async (req, res) => {
@@ -7,13 +8,13 @@ exports.getGlobalStats = async (req, res) => {
         // Récupérer les statistiques de tous les services en parallèle
         const [parkingStats, reservationStats, sensorStats, userStats] = await Promise.all([
             // Statistiques des parkings
-            axios.get(`${process.env.METIER_SERVICE_URL}/api/parkings/stats`),
+            axios.get(API_ENDPOINTS.METIER.PARKINGS.STATS),
             // Statistiques des réservations
-            axios.get(`${process.env.METIER_SERVICE_URL}/api/reservations/stats`),
+            axios.get(API_ENDPOINTS.METIER.RESERVATIONS.STATS),
             // Statistiques des capteurs
-            axios.get(`${process.env.IOT_SERVICE_URL}/api/sensors/stats`),
+            axios.get(API_ENDPOINTS.IOT.SENSORS.STATS),
             // Statistiques des utilisateurs
-            axios.get(`${process.env.AUTH_SERVICE_URL}/api/auth/stats`)
+            axios.get(API_ENDPOINTS.AUTH.STATS)
         ]);
 
         const stats = {
@@ -63,7 +64,7 @@ exports.getOccupancyStats = async (req, res) => {
     try {
         const { startDate, endDate, interval } = req.query;
         
-        const response = await axios.get(`${process.env.METIER_SERVICE_URL}/api/parkings/occupancy`, {
+        const response = await axios.get(API_ENDPOINTS.METIER.PARKINGS.OCCUPANCY, {
             params: { startDate, endDate, interval }
         });
 
@@ -86,7 +87,7 @@ exports.getRevenueStats = async (req, res) => {
     try {
         const { startDate, endDate, groupBy } = req.query;
         
-        const response = await axios.get(`${process.env.METIER_SERVICE_URL}/api/parkings/revenue`, {
+        const response = await axios.get(API_ENDPOINTS.METIER.PARKINGS.REVENUE, {
             params: { startDate, endDate, groupBy }
         });
 
@@ -107,7 +108,7 @@ exports.getRevenueStats = async (req, res) => {
 // Obtenir les statistiques des capteurs IoT
 exports.getSensorStats = async (req, res) => {
     try {
-        const response = await axios.get(`${process.env.IOT_SERVICE_URL}/api/sensors/stats`);
+        const response = await axios.get(API_ENDPOINTS.IOT.SENSORS.STATS);
 
         const stats = {
             sensorStatus: response.data.sensorStatus,

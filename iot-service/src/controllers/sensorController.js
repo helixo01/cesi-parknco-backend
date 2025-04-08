@@ -2,6 +2,7 @@ const Sensor = require('../models/Sensor');
 const SensorData = require('../models/SensorData');
 const { validationResult } = require('express-validator');
 const axios = require('axios');
+const { API_ENDPOINTS } = require('../config/api');
 
 // Enregistrer un nouveau capteur
 exports.registerSensor = async (req, res) => {
@@ -57,7 +58,7 @@ exports.receiveSensorData = async (req, res) => {
     if (type === 'presence' && sensor.location.parkingId && sensor.location.spaceNumber) {
       try {
         // Appeler le service métier pour mettre à jour l'état de la place
-        await axios.patch(`${process.env.METIER_SERVICE_URL}/api/parkings/${sensor.location.parkingId}/space`, {
+        await axios.patch(API_ENDPOINTS.METIER.PARKINGS.UPDATE_SPACE(sensor.location.parkingId), {
           spaceNumber: sensor.location.spaceNumber,
           isOccupied: value === true
         });
