@@ -1,0 +1,45 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [ dev ]
+  pull_request:
+    branches: [ dev ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies for all services
+      run: |
+        for service in authentification-service administrateur-service metier-service iot-service notification-service rating-service stats-service; do
+          if [ -d "$service" ]; then
+            echo "Installing dependencies for $service"
+            cd $service && npm install && cd ..
+          else
+            echo "Warning: $service directory not found, skipping..."
+          fi
+        done
+    
+    - name: Run tests for all services
+      run: |
+        for service in authentification-service administrateur-service metier-service iot-service notification-service rating-service stats-service; do
+          if [ -d "$service" ]; then
+            echo "Running tests for $service"
+            cd $service && npm test && cd ..
+          else
+            echo "Warning: $service directory not found, skipping..."
+          fi
+        done
+      env:
+        MONGODB_URI: ${{ secrets.MONGODB_URI }}
+        JWT_SECRET: ${{ secrets.JWT_SECRET }} 
