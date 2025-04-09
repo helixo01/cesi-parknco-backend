@@ -19,6 +19,15 @@ Le backend est composé de 4 microservices indépendants :
 - Réservation de places
 - Historique des stationnements
 - Gestion des tarifs
+- Système de points et gamification :
+  - Points pour les trajets proposés (10 points)
+  - Points par kilomètre parcouru (1 point/km)
+  - Points pour rejoindre un trajet (5 points)
+  - Points pour donner une note (2 points)
+  - Bonus pour les bonnes notes reçues (≥4 étoiles, 5 points)
+  - Bonus voiture pleine (3+ passagers, multiplicateur x10)
+  - Bonus voiture électrique (15 points)
+  - Classement des utilisateurs
 
 ### 3. Service IoT (Port 5003)
 - État des places en temps réel
@@ -137,37 +146,102 @@ npm start
 ### Service Authentification
 - POST `/api/auth/register` - Inscription utilisateur
 - POST `/api/auth/login` - Connexion utilisateur
+- POST `/api/auth/logout` - Déconnexion utilisateur
 - GET `/api/auth/me` - Informations utilisateur
+- GET `/api/auth/verify` - Vérifier le token
+- POST `/api/auth/change-password` - Changer le mot de passe
+- POST `/api/auth/profile-picture` - Mettre à jour la photo de profil
+- GET `/api/users/public/:userId` - Informations publiques d'un utilisateur
 
 ### Service Métier
+#### Parkings
 - GET `/api/parkings` - Liste des parkings
 - POST `/api/parkings` - Créer un parking
+- GET `/api/parkings/:parkingId` - Détails d'un parking
+- PUT `/api/parkings/:parkingId` - Modifier un parking
+- PUT `/api/parkings/:parkingId/space` - Mettre à jour l'espace disponible
+
+#### Réservations
 - GET `/api/reservations` - Liste des réservations
 - POST `/api/reservations` - Créer une réservation
+- GET `/api/reservations/:reservationId` - Détails d'une réservation
+
+#### Trajets
+- GET `/api/trips` - Liste des trajets
+- POST `/api/trips` - Créer un trajet
+- GET `/api/trips/my-trips` - Mes trajets
+- GET `/api/trips/search` - Rechercher des trajets
+- GET `/api/trips/:tripId` - Détails d'un trajet
+- POST `/api/trips/:tripId/requests` - Demander à rejoindre un trajet
+- GET `/api/trips/:tripId/requests` - Liste des demandes pour un trajet
+- PUT `/api/trips/:tripId/requests/:requestId` - Répondre à une demande
+- POST `/api/trips/:tripId/confirm-driver` - Confirmer en tant que conducteur
+- POST `/api/trips/:tripId/confirm-passenger` - Confirmer en tant que passager
+- POST `/api/trips/:tripId/rate-driver` - Noter le conducteur
+- POST `/api/trips/:tripId/rate-passenger` - Noter un passager
+
+#### Véhicules
+- GET `/api/vehicles` - Liste des véhicules
+- POST `/api/vehicles` - Ajouter un véhicule
+- GET `/api/vehicles/:vehicleId` - Détails d'un véhicule
+- PUT `/api/vehicles/:vehicleId` - Modifier un véhicule
+
+#### Statistiques
 - GET `/api/stats/parkings` - Statistiques des parkings
 - GET `/api/stats/reservations` - Statistiques des réservations
-- GET `/api/stats/occupancy` - Statistiques d'occupation par période
+- GET `/api/stats/occupancy` - Statistiques d'occupation
 - GET `/api/stats/revenue` - Statistiques des revenus
+- GET `/api/stats/users/:userId` - Statistiques d'un utilisateur
 
 ### Service IoT
+#### Capteurs
 - POST `/api/sensors/register` - Enregistrer un capteur
 - POST `/api/sensors/data` - Envoyer des données
 - GET `/api/sensors/:sensorId/status` - État d'un capteur
+- GET `/api/sensors/:sensorId/data` - Données d'un capteur
+- PUT `/api/sensors/:sensorId/location` - Mettre à jour la localisation
 - GET `/api/stats/sensors` - Statistiques des capteurs
+
+#### Agrégation
+- GET `/api/aggregation/daily` - Agrégation journalière
+- GET `/api/aggregation/weekly` - Agrégation hebdomadaire
+- GET `/api/aggregation/monthly` - Agrégation mensuelle
+
+#### Logs
+- GET `/api/logs` - Tous les logs
+- GET `/api/logs/sensor/:sensorId` - Logs d'un capteur
 
 ### Service Administrateur
 
-**Routes Statistiques** (nécessite rôle `admin_tech`) :
-- GET `/api/stats/global` - Statistiques globales de l'application
-- GET `/api/stats/occupancy` - Statistiques détaillées d'occupation
-- GET `/api/stats/revenue` - Statistiques détaillées des revenus
-- GET `/api/stats/sensors` - Statistiques détaillées des capteurs
+#### Gestion Utilisateurs (nécessite rôle `admin_user`)
+- GET `/api/users` - Liste des utilisateurs
+- GET `/api/users/:userId` - Détails d'un utilisateur
+- PUT `/api/users/:userId` - Modifier un utilisateur
+- PUT `/api/users/:userId/role` - Modifier le rôle d'un utilisateur
+- PUT `/api/users/:userId/status` - Activer/désactiver un utilisateur
 
-**Routes Admin Technique** (nécessite rôle `admin_tech`) :
+#### Statistiques (nécessite rôle `admin_user`)
+- GET `/api/stats/global` - Statistiques globales
+- GET `/api/stats/occupancy` - Statistiques d'occupation
+- GET `/api/stats/revenue` - Statistiques des revenus
+- GET `/api/stats/users/:userId` - Statistiques utilisateur
+- GET `/api/stats/users` - Classement global
+- GET `/api/stats/dashboard` - Tableau de bord
+
+#### Gamification (nécessite rôle `admin_user`)
+- GET `/api/gamification` - Configuration de gamification
+- PUT `/api/gamification` - Mettre à jour la configuration
+
+#### IoT et Système (nécessite rôle `admin_tech`)
 - GET `/api/system/health` - État des services
-- GET `/api/system/stats` - Statistiques système
+- GET `/api/system/services` - Liste des services
+- GET `/api/system/metrics` - Métriques système
 - GET `/api/system/audit` - Logs d'audit
 - GET `/api/system/config` - Configuration système
+- GET `/api/stats/sensors` - Statistiques des capteurs
+- GET `/api/sensors/maintenance` - État de maintenance des capteurs
+- GET `/api/sensors/alerts` - Alertes des capteurs
+- GET `/api/sensors/config` - Configuration des capteurs
 
 ## Sécurité
 
@@ -197,6 +271,19 @@ Le service administrateur fournit des statistiques globales via plusieurs endpoi
 - État des capteurs IoT
 - Tendances d'occupation
 - Statistiques des réservations
+- Statistiques de gamification :
+  - Nombre total de points distribués
+  - Moyenne des points par utilisateur
+  - Top utilisateurs du mois
+  - Distribution des bonus
+
+### Statistiques Utilisateurs (`/api/stats/users/:userId`)
+- Total des points
+- Classement global
+- Note moyenne reçue
+- Historique des points gagnés
+- Position dans le classement
+- Détail des bonus obtenus
 
 ### Statistiques d'Occupation (`/api/stats/occupancy`)
 - Taux d'occupation par période
