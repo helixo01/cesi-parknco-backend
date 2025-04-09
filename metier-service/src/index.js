@@ -24,11 +24,11 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  exposedHeaders: ['Content-Range', 'X-Content-Range'],
-  credentials: true
+    origin: true, // Accepte toutes les origines en développement
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Cookie'],
+    exposedHeaders: ['Content-Range', 'X-Content-Range'],
+    credentials: true
 }));
 
 // Logging middleware pour le debug

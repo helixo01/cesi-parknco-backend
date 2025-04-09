@@ -276,22 +276,43 @@ exports.getUserStats = async (req, res) => {
   try {
     const userId = req.params.userId;
     
-    // Récupérer la configuration de gamification
-    const config = await getGamificationConfig();
-
     // Récupérer l'utilisateur depuis la base de données d'authentification
-    const authDb = mongoose.connection.useDb('parknco-auth');
-    const AuthUser = authDb.model('User', new mongoose.Schema({
-      firstName: String,
-      lastName: String,
-      email: String,
-      role: String,
-      active: Boolean
-    }));
+    let user;
+    try {
+      const authDb = mongoose.connection.useDb('parknco-auth');
+      const AuthUser = authDb.model('User', new mongoose.Schema({
+        firstName: String,
+        lastName: String,
+        email: String,
+        role: String,
+        active: Boolean
+      }));
 
-    const user = await AuthUser.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      user = await AuthUser.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+    } catch (authError) {
+      console.error('Error accessing auth database:', authError);
+      return res.status(500).json({ message: 'Error accessing user information' });
+    }
+
+    // Récupérer la configuration de gamification
+    let config;
+    try {
+      config = await getGamificationConfig();
+    } catch (gamificationError) {
+      console.error('Error fetching gamification config:', gamificationError);
+      // Utiliser une configuration par défaut en cas d'erreur
+      config = {
+        pointsProposedTrip: 10,
+        pointsJoinTrip: 5,
+        pointsPerKm: 1,
+        bonusFullCar: 1.5,
+        bonusElectricCar: 20,
+        pointsGoodRating: 10,
+        pointsRating: 5
+      };
     }
 
     // Récupérer tous les trajets où l'utilisateur est conducteur ou passager
@@ -368,65 +389,91 @@ exports.getUserStats = async (req, res) => {
     const averageRating = ratingCount > 0 ? totalRating / ratingCount : 0;
 
     // Récupérer tous les utilisateurs depuis la base de données d'authentification
-    const allUsers = await AuthUser.find({ active: true });
+    let allUsers;
+    try {
+      const authDb = mongoose.connection.useDb('parknco-auth');
+      const AuthUser = authDb.model('User', new mongoose.Schema({
+        firstName: String,
+        lastName: String,
+        email: String,
+        role: String,
+        active: Boolean
+      }));
+      allUsers = await AuthUser.find({ active: true });
+    } catch (authError) {
+      console.error('Error accessing auth database for all users:', authError);
+      allUsers = [];
+    }
+
+    // Calculer les statistiques pour tous les utilisateurs
     const userStats = await Promise.all(
       allUsers.map(async (user) => {
-        const userTrips = await Trip.find({
-          $or: [
-            { userId: user._id },
-            { 'requests.userId': user._id, 'requests.status': 'accepted' }
-          ]
-        });
+        try {
+          const userTrips = await Trip.find({
+            $or: [
+              { userId: user._id },
+              { 'requests.userId': user._id, 'requests.status': 'accepted' }
+            ]
+          });
 
-        let points = 0;
-        
-        // Calculer les points pour chaque utilisateur
-        for (const trip of userTrips) {
-          if (trip.userId.toString() === user._id.toString()) {
-            points += config.pointsProposedTrip;
-            const distance = parseFloat(trip.distance);
-            if (!isNaN(distance)) {
-              points += distance * config.pointsPerKm;
-            }
-            const acceptedRequests = trip.requests.filter(r => r.status === 'accepted').length;
-            if (acceptedRequests >= 3) {
-              points *= config.bonusFullCar;
-            }
-            if (trip.vehicle === "electrique") {
-              points += config.bonusElectricCar;
-            }
-          } else {
-            points += config.pointsJoinTrip;
-            const distance = parseFloat(trip.distance);
-            if (!isNaN(distance)) {
-              points += distance * config.pointsPerKm;
+          let points = 0;
+          
+          // Calculer les points pour chaque utilisateur
+          for (const trip of userTrips) {
+            if (trip.userId.toString() === user._id.toString()) {
+              points += config.pointsProposedTrip;
+              const distance = parseFloat(trip.distance);
+              if (!isNaN(distance)) {
+                points += distance * config.pointsPerKm;
+              }
+              const acceptedRequests = trip.requests.filter(r => r.status === 'accepted').length;
+              if (acceptedRequests >= 3) {
+                points *= config.bonusFullCar;
+              }
+              if (trip.vehicle === "electrique") {
+                points += config.bonusElectricCar;
+              }
+            } else {
+              points += config.pointsJoinTrip;
+              const distance = parseFloat(trip.distance);
+              if (!isNaN(distance)) {
+                points += distance * config.pointsPerKm;
+              }
             }
           }
-        }
 
-        const userRatings = await Rating.find({
-          $or: [
-            { fromUserId: user._id },
-            { toUserId: user._id }
-          ]
-        });
+          const userRatings = await Rating.find({
+            $or: [
+              { fromUserId: user._id },
+              { toUserId: user._id }
+            ]
+          });
 
-        for (const rating of userRatings) {
-          if (rating.toUserId.toString() === user._id.toString()) {
-            if (rating.rating >= 4) {
-              points += config.pointsGoodRating;
+          for (const rating of userRatings) {
+            if (rating.toUserId.toString() === user._id.toString()) {
+              if (rating.rating >= 4) {
+                points += config.pointsGoodRating;
+              }
+            } else {
+              points += config.pointsRating;
             }
-          } else {
-            points += config.pointsRating;
           }
-        }
 
-        return {
-          id: user._id,
-          name: `${user.firstName} ${user.lastName}`,
-          role: user.role,
-          points
-        };
+          return {
+            id: user._id,
+            name: `${user.firstName} ${user.lastName}`,
+            role: user.role,
+            points
+          };
+        } catch (error) {
+          console.error(`Error calculating stats for user ${user._id}:`, error);
+          return {
+            id: user._id,
+            name: `${user.firstName} ${user.lastName}`,
+            role: user.role,
+            points: 0
+          };
+        }
       })
     );
 

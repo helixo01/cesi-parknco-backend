@@ -3,10 +3,10 @@
  */
 
 // URLs des services (basées sur les variables d'environnement)
-const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:5001';
-const METIER_SERVICE_URL = process.env.METIER_SERVICE_URL || 'http://localhost:5002';
-const ADMIN_SERVICE_URL = process.env.ADMIN_SERVICE_URL || 'http://localhost:5004';
-const IOT_SERVICE_URL = process.env.IOT_SERVICE_URL || 'http://localhost:5003';
+const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://laptop-omen-rvr:5001';
+const METIER_SERVICE_URL = process.env.METIER_SERVICE_URL || 'http://laptop-omen-rvr:5002';
+const ADMIN_SERVICE_URL = process.env.ADMIN_SERVICE_URL || 'http://laptop-omen-rvr:5004';
+const IOT_SERVICE_URL = process.env.IOT_SERVICE_URL || 'http://laptop-omen-rvr:5003';
 
 // Configuration des endpoints API
 const API_ENDPOINTS = {

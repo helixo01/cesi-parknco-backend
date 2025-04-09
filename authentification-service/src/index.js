@@ -10,16 +10,18 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  origin: true, // Accepte toutes les origines en développement
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Cookie'],
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
   credentials: true
 }));
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(fileUpload({
+
+// Middleware pour le téléchargement de fichiers (uniquement pour les routes qui en ont besoin)
+app.use('/api/auth/profile-picture', fileUpload({
   limits: { fileSize: 5 * 1024 * 1024 }, // Limite de 5MB
   abortOnLimit: true,
   responseOnLimit: 'La taille du fichier ne doit pas dépasser 5MB',
@@ -39,9 +41,8 @@ app.use((req, res, next) => {
 });
 
 // Routes
-app.use('/api/auth', require('./routes/auth'));    // Routes d'authentification publiques
+app.use('/api/auth', require('./routes/auth'));    // Routes d'authentification
 app.use('/api/users', require('./routes/users'));   // Routes de gestion des utilisateurs (admin)
-app.use('/auth', require('./routes/auth')); 
 
 app.get('/health', (req, res) => {
     res.json({ 
